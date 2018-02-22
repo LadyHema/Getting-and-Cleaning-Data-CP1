@@ -2,12 +2,11 @@ library(ggplot2)
 library(dplyr)
 library(data.table)
 library(WriteXLS)
-# setwd("~/Documents/R/coursera/c3w4")
-# download.file(url = "https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip",
-#               destfile = "run.zip", method = "curl")
-# unzip("run.zip")
-# setwd("UCI HAR Dataset")
-# getwd()
+download.file(url = "https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip",
+              destfile = "run.zip", method = "curl")
+unzip("run.zip")
+setwd("UCI HAR Dataset")
+
 
 #download and unpack this script in folder with downloaded and unpacked "UCI HAR Dataset"
 #run the script
