@@ -1,0 +1,71 @@
+---
+title: "Run_analysis_descript_book"
+author: "Hema"
+date: "18 02 2018"
+output: html_document
+---
+
+## Run activity Analysis
+
+###When you run this script - it downloaded and unpacked "UCI HAR Dataset" from internet, create some data aggregation and create a new file  - "mean_values.xlsx" with the average of each variable for each activity and each subject of investigation  
+
+Read datas from internet and include libraries
+```{r setup, include=FALSE, echo = FALSE, cashe = TRUE}
+library(ggplot2)
+library(dplyr)
+library(data.table)
+library(WriteXLS)
+download.file(url = "https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip",
+               destfile = "run.zip", method = "curl")
+unzip("run.zip")
+knitr::opts_knit$set(root.dir = normalizePath("UCI HAR Dataset"))
+```
+
+
+
+read.datas from test and train subset from csv, and merge them with information about type of activity  
+```{r}
+xtrain <- cbind(read.table(file = "train/y_train.txt"), read.table(file = "train/X_train.txt"))
+xtest <- cbind(read.table(file = "test/y_test.txt"),read.table(file = "test/X_test.txt"))
+```
+
+read labels/subjects/features' name  
+```{r}
+features <- read.table(file = "features.txt")
+labels_act <- read.table(file = "activity_labels.txt")
+subject <- rbind(read.table(file = "train/subject_train.txt"), read.table(file = "test/subject_test.txt"))
+```
+
+
+merge two datasets (train and test) in one and rename the column with features and rename numeric labels activity by string. So we receive the complete dataset with `r ncol(xtrain) ` number of columns and `r nrow(rbind(xtrain, xtest))` number of variables.  
+The first column of dataset is type of activity, coding by numbers from `r min(rbind(xtrain, xtest)[1])` to `r max(rbind(xtrain, xtest)[1])`. For the best undestanding of data we replace the numeric activity code by string activity name from "activity_labels.txt"  
+So we will have activity column with values:
+`r labels_act$V2`  
+```{r}
+dset <- rbind(xtrain, xtest)
+names(dset) <- c("activity", as.character(features$V2))
+dset$activity <- labels_act$V2[dset$activity]
+```
+
+Extracts only the measurements on the mean and standard deviation for each measurement  
+```{r}
+dset <- dset[,grepl("-mean()|-std()|activity", names(dset))]
+```
+
+create new dataset with information about subject  
+```{r}
+subactivity <- cbind(subject, dset)
+names(subactivity)[1] <- "subject"
+```
+
+Now we create from the merged data set a second, independent tidy data set with the average of each variable for each activity and each subject. We group our dataset by two groping variables: subject and activity, and calculate the mean values for other columns.  
+The new dataset we save as "mean_values.xlsx" file to main directory with our zip file  
+```{r}
+mean_values <- subactivity %>% 
+  group_by(subject, activity) %>% 
+  summarise_all(mean)
+
+setwd('..')
+WriteXLS(mean_values, ExcelFileName = "mean_values.xlsx")
+```
+
