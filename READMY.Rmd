@@ -14,7 +14,6 @@ Read datas from internet and include libraries
 library(ggplot2)
 library(dplyr)
 library(data.table)
-library(WriteXLS)
 download.file(url = "https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip",
                destfile = "run.zip", method = "curl")
 unzip("run.zip")
@@ -59,13 +58,13 @@ names(subactivity)[1] <- "subject"
 ```
 
 Now we create from the merged data set a second, independent tidy data set with the average of each variable for each activity and each subject. We group our dataset by two groping variables: subject and activity, and calculate the mean values for other columns.  
-The new dataset we save as "mean_values.xlsx" file to main directory with our zip file  
+The new dataset we save as "mean_values.txt" file to main directory with our zip file  
 ```{r}
 mean_values <- subactivity %>% 
   group_by(subject, activity) %>% 
   summarise_all(mean)
 
 setwd('..')
-WriteXLS(mean_values, ExcelFileName = "mean_values.xlsx")
+write.table(mean_values, file = "mean_values.txt", row.names = FALSE)
 ```
 
